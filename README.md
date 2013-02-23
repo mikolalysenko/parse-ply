@@ -24,7 +24,7 @@ More Information
 ================
 To learn more about the PLY file format, here are some links:
 
-* [Wikipedia](http://en.wikipedia.org/wiki/PLY_\(file_format\))
+* [Wikipedia](http://en.wikipedia.org/wiki/PLY_(file_format))
 * [Paul Bourke's C code](http://paulbourke.net/dataformats/ply/)
 
 You can also view PLY files using standard tools, like MeshLab:
