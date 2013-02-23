@@ -1,0 +1,37 @@
+{
+  "name": "parse-ply",
+  "version": "0.0.0",
+  "description": "A streaming PLY parser",
+  "main": "parse-ply.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "through": "~2.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node test/dump_ply.js < test/cube_ascii.ply"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mikolalysenko/parse-ply.git"
+  },
+  "keywords": [
+    "ply",
+    "graphics",
+    "mesh",
+    "stanford",
+    "3d",
+    "greg",
+    "turk",
+    "file",
+    "format",
+    "parser",
+    "read"
+  ],
+  "author": "Mikola Lysenko",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "gitHead": "2cff5a03522d741c4a7a382ae7b8ddf1ada993e6"
+}
