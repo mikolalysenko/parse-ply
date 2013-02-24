@@ -45,6 +45,10 @@ var PLY_TYPENAMES = {
   "float64":  [ PLY_TYPES.FLOAT, 8, Float64Array ]
 };
 
+var SYSTEM_ENDIAN = require("is-little-endian") ?
+      PLY_FORMAT.BINARY_LITTLE_ENDIAN :
+      PLY_FORMAT.BINARY_BIG_ENDIAN;
+
 function PLYProperty(name, data, type, size0, size1) {
   this.name = name;
   this.data = data;
@@ -70,6 +74,8 @@ function PLYParser() {
   this.current_element = 0;
   this.current_index = 0;
   this.current_line = 0;
+  this.current_property = 0;
+  this.current_list_property = -1;
   this.last_line = "";
 }
 
@@ -117,6 +123,81 @@ PLYParser.prototype.getline = function(max_len) {
   return null;
 }
 
+PLYParser.prototype.getchar = function() {
+  if(this.buffers.length > 0) {
+    var v = this.buffers[0][this.offset];
+    this.offset++;
+    if(this.offset > this.buffers[0].length) {
+      this.offset = 0;
+      this.buffers.shift();
+    }
+    return v;
+  }
+  return -1;
+}
+
+//Stupid hack to make getint/getfloat work
+PLYParser.prototype.rewind = function(c) {
+  if(this.offset > 0) {
+    this.offset--;
+    return;
+  }
+  var tmp_buf = new Buffer(1);
+  tmp_buf[0] = c;
+  this.buffers.unshift(tmp_buf);
+}
+
+var data_buffer = new Uint8Array(8);
+var float_view = new Float32Array(data_buffer.buffer);
+var double_view = new Float64Array(data_buffer.buffer);
+
+PLYParser.prototype.getint = function(len) {
+  for(var i=0; i<len; ++i) {
+    var v = this.getchar();
+    if(v < 0) {
+      while(i >= 0) {
+        this.rewind(data_buffer[i]);
+      }
+      return Number.NaN;
+    }
+  }
+  var r = 0;
+  if(this.format === PLY_FORMAT.BINARY_LITTLE_ENDIAN) {
+    for(var j=0; j<len; ++j) {
+      r += data_buffer[j] << (8*j);
+    }
+  } else {
+    for(var j=0; j<len; ++j) {
+      r += data_buffer[len-j-1] << (8*j);
+    }
+  }
+  return r;
+}
+
+PLYParser.prototype.getfloat = function(len) {
+  for(var i=0; i<len; ++i) {
+    var v = this.getchar();
+    if(v < 0) {
+      while(i >= 0) {
+        this.rewind(data_buffer[i]);
+      }
+      return Number.NaN;
+    }
+  }
+  if(this.format !== SYSTEM_ENDIAN) {
+    for(var i=0; i<len; ++i) {
+      var t = data_buffer[i];
+      data_buffer[i] = data_buffer[len-i-1];
+      data_buffer[len-i-1] = t;
+    }
+  }
+  if(len === 4) {
+    return float_view[0];
+  } else {
+    return double_view[0];
+  }
+}
+
 
 PLYParser.prototype.clearBuffers = function() {
   this.offset = 0;
@@ -153,9 +234,73 @@ PLYParser.prototype.createResult = function() {
 
 
 PLYParser.prototype.processBinary = function() {
-  //TODO: Figure this out
-  this.raiseError("Binary PLY currently unsupported");
-  return false;
+  while(this.current_element < this.elements.length) {
+    var c = this.elements[this.current_element];
+    var props = c.properties;
+    while(this.current_index < c.count) {
+      var idx = this.current_index;
+      while(this.current_property < props.length) {
+        var p = props[this.current_property];
+        switch(p.type) {
+          case PLY_TYPES.INT:
+            var vi = this.getint(p.size0);
+            if(isNaN(vi)) {
+              return false;
+            }
+            p.data[idx] = vi;
+          break;
+          
+          case PLY_TYPES.FLOAT:
+            var vf = this.getfloat(p.size0);
+            if(isNaN(vf)) {
+              return false;
+            }
+            p.data[idx] = vf;
+          break;
+          
+          case PLY_TYPES.LIST_INT:
+          case PLY_TYPES.LIST_FLOAT:
+            var lst;
+            if(this.current_list_property < 0) {
+              var vi = this.getint(p.size0);
+              if(isNaN(vi)) {
+                return false;
+              }
+              lst = new Array(vi);
+              p.data[idx] = lst;
+              this.current_list_property = 0;
+            } else {
+              lst = p.data[idx];
+            }
+            while(this.current_list_property < lst.length) {
+              var v;
+              if(p.type === PLY_TYPES.LIST_INT) {
+                v = this.getint(p.size1);
+              } else {
+                v = this.getfloat(p.size1);
+              }
+              if(isNaN(v)) {
+                return false;
+              }
+              lst[this.current_list_property++] = v;
+            }
+            this.current_list_property = -1;
+          break;
+          
+          default:
+            this.raiseError("Uninitialized property type (this should never happen)");
+            return false;
+        }
+      }
+      
+      this.current_property = 0;
+      this.current_index += 1;
+    }
+    this.current_index = 0;
+    this.current_element++;
+  }
+  this.state = PARSER_STATE.DONE;
+  return true;
 }
 
 PLYParser.prototype.processAscii = function() {
