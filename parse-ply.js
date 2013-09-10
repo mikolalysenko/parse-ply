@@ -579,9 +579,15 @@ PLYParser.prototype.onend = function() {
   }
 }
 
-function createPLYParser() {
+function createPLYParser(stream, cb) {
   var parser = new PLYParser();
-  return parser.stream;
+  stream.pipe(parser.stream)
+  .on("data", function(data) {
+    cb(null, data);
+  })
+  .on("error", function(err) {
+    cb(err);
+  });
 }
 
 module.exports = createPLYParser;

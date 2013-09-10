@@ -1,14 +1,14 @@
 {
   "name": "parse-ply",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A streaming PLY parser",
   "main": "parse-ply.js",
   "directories": {
     "test": "test"
   },
   "dependencies": {
-    "through": "~2.2.0",
-    "is-little-endian": "~0.0"
+    "through": "~2.3.4",
+    "is-little-endian": "~0.0.0"
   },
   "devDependencies": {},
   "scripts": {
@@ -32,7 +32,7 @@
     "read"
   ],
   "author": "Mikola Lysenko",
-  "license": "BSD",
+  "license": "MIT",
   "readmeFilename": "README.md",
   "gitHead": "2cff5a03522d741c4a7a382ae7b8ddf1ada993e6"
 }

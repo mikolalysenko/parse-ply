@@ -1,3 +1,3 @@
-process.stdin.pipe(require("../parse-ply.js")()).on("data", function(ply) {
+require("../parse-ply.js")(process.stdin, function(err, ply) {
   console.log(ply);
 });

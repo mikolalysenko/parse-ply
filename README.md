@@ -10,15 +10,18 @@ First, install using npm:
 
 Then you can create a stream using require.  For example, here is some code that parses a PLY file from stdin and dumps the result to stdout:
 
-    process.stdin.pipe(require("parse-ply")()).on("data", function(ply) {
+    require("parse-ply")(process.stdin, function(ply) {
       console.log(ply);
     });
 
 The properties within the file are all encoded as appropriate typed arrays.
 
-`require("parse-ply")()`
+`require("parse-ply")(stream, cb)`
 ------------------------
 This creates a streaming PLY parser.  To use it, pipe in a stream containing your mesh.  When it is done, it will emit a `data` event that has the parsed PLY file as the main argument.
+
+* `stream` is a stream object
+* `cb(err, data)` is callback that is executed once the PLY is fully parsed
 
 More Information
 ================
