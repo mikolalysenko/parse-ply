@@ -23,6 +23,13 @@ This creates a streaming PLY parser.  To use it, pipe in a stream containing you
 * `stream` is a stream object
 * `cb(err, data)` is callback that is executed once the PLY is fully parsed
 
+### Data structure
+The returned `data` field contains the contents of the completely parsed PLY file and has the two fields:
+
+* `vertex`: An object whose properties are the attributes of each vertex.
+* `face`: An object whose properties are the attributes of each face.
+
+
 More Information
 ================
 To learn more about the PLY file format, here are some links:
