@@ -313,7 +313,7 @@ PLYParser.prototype.processAscii = function() {
         return false;
       }
       var idx = this.current_index;
-      var toks = l.split(" ");
+      var toks = l.trim().split(" ");
       var c_tok = 0;
       for(var i=0; i<props.length; ++i) {
         if(c_tok >= toks.length) {
@@ -435,7 +435,7 @@ PLYParser.prototype.processToken = function() {
       if(!l) {
         return false;
       }
-      var toks = l.split(" ");
+      var toks = l.trim().split(" ");
       if(toks.length > 0 && toks[0] === "comment") {
         return true;
       }
@@ -470,7 +470,7 @@ PLYParser.prototype.processToken = function() {
       if(!l) {
         return false;
       }
-      var toks = l.split(" ");
+      var toks = l.trim().split(" ");
       switch(toks[0]) {
         case "element":
           if(toks.length !== 3) {
