@@ -291,6 +291,7 @@ PLYParser.prototype.processBinary = function() {
             this.raiseError("Uninitialized property type (this should never happen)");
             return false;
         }
+        this.current_property++;
       }
       
       this.current_property = 0;
@@ -313,7 +314,7 @@ PLYParser.prototype.processAscii = function() {
         return false;
       }
       var idx = this.current_index;
-      var toks = l.split(" ");
+      var toks = l.trim().split(" ");
       var c_tok = 0;
       for(var i=0; i<props.length; ++i) {
         if(c_tok >= toks.length) {
@@ -435,7 +436,7 @@ PLYParser.prototype.processToken = function() {
       if(!l) {
         return false;
       }
-      var toks = l.split(" ");
+      var toks = l.trim().split(" ");
       if(toks.length > 0 && toks[0] === "comment") {
         return true;
       }
@@ -470,7 +471,7 @@ PLYParser.prototype.processToken = function() {
       if(!l) {
         return false;
       }
-      var toks = l.split(" ");
+      var toks = l.trim().split(" ");
       switch(toks[0]) {
         case "element":
           if(toks.length !== 3) {
@@ -562,7 +563,8 @@ PLYParser.prototype.ondata = function(data) {
   } else {
     this.buffers.push(new Buffer(data));
   }
-  while(this.processToken()) { }
+  // This was in a wrong place 
+  // while(this.processToken()) { }
 }
 
 
@@ -570,6 +572,7 @@ var TRAIL_EOL = new Buffer(1);
 TRAIL_EOL[0] = 10;
 PLYParser.prototype.onend = function() {
   this.ondata(TRAIL_EOL);
+  while(this.processToken()) { }
   this.clearBuffers();
   if(this.state === PARSER_STATE.DONE) {
     this.stream.emit("data", this.createResult());
