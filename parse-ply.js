@@ -563,7 +563,8 @@ PLYParser.prototype.ondata = function(data) {
   } else {
     this.buffers.push(new Buffer(data));
   }
-  while(this.processToken()) { }
+  // This was in a wrong place 
+  // while(this.processToken()) { }
 }
 
 
@@ -571,6 +572,7 @@ var TRAIL_EOL = new Buffer(1);
 TRAIL_EOL[0] = 10;
 PLYParser.prototype.onend = function() {
   this.ondata(TRAIL_EOL);
+  while(this.processToken()) { }
   this.clearBuffers();
   if(this.state === PARSER_STATE.DONE) {
     this.stream.emit("data", this.createResult());
