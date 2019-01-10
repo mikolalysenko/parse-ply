@@ -291,6 +291,7 @@ PLYParser.prototype.processBinary = function() {
             this.raiseError("Uninitialized property type (this should never happen)");
             return false;
         }
+        this.current_property++;
       }
       
       this.current_property = 0;
